@@ -1,5 +1,32 @@
 # SimpleClaw 🦞
 
+<div style="font-size: 2em; font-weight: bold; text-align: center;">
+  Neural Modes
+</div>
+
+<div style="font-size: 1.2em; text-align: center;">
+  Choose the mode that fits your needs:
+</div>
+
+<div style="display: flex; justify-content: space-around; margin-top: 20px;">
+  <div>
+    <div style="font-size: 1.5em; font-weight: bold;">Super-Eco (The Ghost)</div>
+    <div style="font-size: 1em;">Maximum speed, minimum token usage. Best for quick questions and simple tasks.</div>
+  </div>
+  <div>
+    <div style="font-size: 1.5em; font-weight: bold;">Standard (The Assistant)</div>
+    <div style="font-size: 1em;">Balanced experience for general coding tasks and debugging.</div>
+  </div>
+  <div>
+    <div style="font-size: 1.5em; font-weight: bold;">Full-Context (The Engineer)</div>
+    <div style="font-size: 1em;">Unrestricted power for complex problem-solving. Use with caution!</div>
+  </div>
+</div>
+
+<br>
+
+# SimpleClaw 🦞
+
 SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a gateway to local models (via Ollama) and remote providers (OpenRouter, HuggingFace), providing both a Command Line Interface (CLI) and a modern Web UI.
 
 Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control. 
