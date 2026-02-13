@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Configuration & Secrets
+.env
+config.json
+env/*.txt
+
+# Data
+storage/*.json
+storage/*.meta.json
+
+# Backups
+backup_*/
+*.bak
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log

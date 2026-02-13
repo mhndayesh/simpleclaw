@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SimpleClaw - Mode Selector</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .mode-selector { margin: 20px 0; padding: 10px; background: #f5f5f5; }
+        select { padding: 5px; margin: 0 10px; }
+        .chat-area { border: 1px solid #ccc; padding: 20px; min-height: 300px; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .user { background: #e3f2fd; text-align: right; }
+        .assistant { background: #f3e5f5; }
+        .eco-mode { color: #2e7d32; font-weight: bold; }
+        .standard-mode { color: #1565c0; font-weight: bold; }
+        .full-mode { color: #c62828; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>SimpleClaw Chat Interface</h1>
+    
+    <div class="mode-selector">
+        <label for="modeSelect">Select Mode:</label>
+        <select id="modeSelect" onchange="changeMode()">
+            <option value="super-eco">🟢 Super Eco Mode</option>
+            <option value="standard">🔵 Standard Mode</option>
+            <option value="full-context">🔴 Full Context Mode</option>
+        </select>
+        <span id="modeDescription"></span>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+        <div class="message assistant">
+            <span class="eco-mode">🟢 Super Eco Mode Active</span><br>
+            Minimal tokens: Only last 5 requests summarized, no tools sent unless requested
+        </div>
+    </div>
+
+    <div>
+        <input type="text" id="userInput" placeholder="Type your message..." style="width: 300px; padding: 5px;">
+        <button onclick="sendMessage()">Send</button>
+        <label>
+            <input type="checkbox" id="includeTools"> Include Tools in Request
+        </label>
+    </div>
+
+    <script>
+        const MODES = {
+            'super-eco': { 
+                name: '🟢 Super Eco Mode',
+                desc: 'Minimal tokens: Only last 5 requests summarized, no tools sent unless requested',
+                color: 'eco-mode'
+            },
+            'standard': { 
+                name: '🔵 Standard Mode',
+                desc: 'Balanced: Moderate context with tool definitions',
+                color: 'standard-mode'
+            },
+            'full-context': { 
+                name: '🔴 Full Context Mode',
+                desc: 'Maximum context: Full history with all tools',
+                color: 'full-mode'
+            }
+        };
+
+        let currentMode = 'super-eco';
+        let conversation = [];
+
+        function changeMode() {
+            const select = document.getElementById('modeSelect');
+            currentMode = select.value;
+            
+            const modeInfo = MODES[currentMode];
+            document.getElementById('modeDescription').innerHTML = 
+                `<span class="${modeInfo.color}">${modeInfo.name}: ${modeInfo.desc}</span>`;
+            
+            addMessage('assistant', `${modeInfo.name} activated: ${modeInfo.desc}`);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const includeTools = document.getElementById('includeTools').checked;
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage('user', message);
+            conversation.push({ type: 'user', content: message });
+            
+            // Simulate AI processing with current mode
+            const response = simulateAIResponse(message, includeTools);
+            addMessage('assistant', response);
+            conversation.push({ type: 'assistant', content: response });
+            
+            input.value = '';
+        }
+
+        function simulateAIResponse(message, includeTools) {
+            const mode = MODES[currentMode];
+            let response = `Mode: <span class="${mode.color}">${mode.name}</span><br>`;
+            response += `Request: "${message}"<br>`;
+            
+            if (includeTools || currentMode !== 'super-eco') {
+                response += `Tools: WRITE, EXEC available<br>`;
+            }
+            
+            response += `Context used: Last ${currentMode === 'super-eco' ? '3' : 
+                        currentMode === 'standard' ? '10' : '50'} requests<br>`;
+            response += `Token estimate: ${currentMode === 'super-eco' ? '25-50' : 
+                        currentMode === 'standard' ? '100-200' : '500-1000'} tokens`;
+            
+            return response;
+        }
+
+        function addMessage(sender, content) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = content;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Initialize
+        changeMode();
+    </script>
+</body>
+</html>

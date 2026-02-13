@@ -1,0 +1,8 @@
+{
+  "primary": { "model": "ollama/default" },
+  "fallback": { "model": "" },
+  "settings": {
+    "maxTurns": 5,
+    "mode": "super-eco"
+  }
+}

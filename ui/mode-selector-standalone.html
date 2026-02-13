@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SimpleClaw Mode Selector</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+        }
+        .mode-selector {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        select, button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #555;
+        }
+        select { background: #2a2a2a; color: white; }
+        button { background: #00aa00; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🎯 SimpleClaw Mode Selector</h1>
+    
+    <div class="mode-selector">
+        <h3>🟢 Select Mode</h3>
+        
+        <select id="mode-dropdown">
+            <option value="super-eco">🟢 Super Eco Mode</option>
+            <option value="standard">🔵 Standard Mode</option>
+            <option value="full-context">🔴 Full Context Mode</option>
+        </select>
+        
+        <div id="mode-description" style="font-size: 12px; color: #ccc; padding: 8px; background: #2a2a2a; border-radius: 4px;">
+            Minimal tokens: Only last 3 requests summarized, no tools sent unless requested
+        </div>
+        
+        <button onclick="applyMode()">Apply Mode</button>
+    </div>
+
+    <script>
+        function updateDescription() {
+            const mode = document.getElementById('mode-dropdown').value;
+            const descriptions = {
+                'super-eco': '🟢 Minimal tokens: Only last 3 requests summarized, no tools sent unless requested',
+                'standard': '🔵 Balanced: Moderate context with tool definitions', 
+                'full-context': '🔴 Maximum context: Full history with all tools'
+            };
+            document.getElementById('mode-description').textContent = descriptions[mode];
+        }
+
+        function applyMode() {
+            const selectedMode = document.getElementById('mode-dropdown').value;
+            const modeText = document.querySelector(`option[value="${selectedMode}"]`).textContent;
+            
+            alert(`Mode changed to: ${modeText}\n\nCopy this command to SimpleClaw:\nSYSTEM: Change mode to ${selectedMode.toUpperCase()}`);
+        }
+
+        document.getElementById('mode-dropdown').addEventListener('change', updateDescription);
+        updateDescription(); // Initial description
+    </script>
+</body>
+</html>
