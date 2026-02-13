@@ -72,3 +72,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 SimpleClaw is proudly inspired by **[OpenClaw](https://github.com/openclaw/openclaw)**. We thank the OpenClaw community for their pioneering work in personal AI systems. SimpleClaw aims to provide a simplified, user-first experience built on those foundational ideas.
 
+**Contact**: [mhndayesh@gmail.com](mailto:mhndayesh@gmail.com)
+

@@ -40,3 +40,5 @@ SimpleClaw is a TypeScript project that compiles down to high-performance JavaSc
 - **Streaming**: Implementation of Server-Sent Events (SSE) for faster response feel.
 
 SimpleClaw isn't just a tool; it's a foundation for building your own personal AI operational center. 🦞
+
+**Author**: [mhndayesh@gmail.com](mailto:mhndayesh@gmail.com)
