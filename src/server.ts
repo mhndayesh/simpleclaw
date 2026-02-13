@@ -42,6 +42,7 @@ async function getProviders(): Promise<Provider[]> {
 
     const openRouterKey = await getSecret('openrouter');
     const hfKey = await getSecret('hf');
+    const openaiKey = await getSecret('openai');
 
     const providers: Provider[] = [];
 
@@ -49,19 +50,24 @@ async function getProviders(): Promise<Provider[]> {
     if (config.primary && config.primary.provider) {
         if (config.primary.provider === 'openrouter' && openRouterKey) providers.push(new OpenRouterProvider(openRouterKey));
         else if (config.primary.provider === 'huggingface' && hfKey) providers.push(new HuggingFaceProvider(hfKey));
+        else if (config.primary.provider === 'openai' && openaiKey) providers.push(new (await import('./providers/openai.js')).OpenAIProvider(openaiKey));
         else if (config.primary.provider === 'ollama') providers.push(new OllamaProvider());
     }
 
     // Add any other available cloud providers (avoid duplicating the primary)
     if (openRouterKey && !providers.find(p => p instanceof OpenRouterProvider)) providers.push(new OpenRouterProvider(openRouterKey));
     if (hfKey && !providers.find(p => p instanceof HuggingFaceProvider)) providers.push(new HuggingFaceProvider(hfKey));
+    if (openaiKey && !providers.find(p => (p as any).id === 'openai')) {
+        const { OpenAIProvider } = await import('./providers/openai.js');
+        providers.push(new OpenAIProvider(openaiKey));
+    }
 
     // Only include Ollama if explicitly referenced in config (primary or fallback) or
     // when there are no cloud providers available and no explicit primary —
     // this avoids probing Ollama on every startup when cloud keys are present.
     const wantOllamaExplicit = (config.primary && config.primary.provider === 'ollama')
         || (config.fallback && config.fallback.provider === 'ollama');
-    const hasCloud = !!openRouterKey || !!hfKey;
+    const hasCloud = !!openRouterKey || !!hfKey || !!openaiKey;
     if (wantOllamaExplicit || (!hasCloud && !config.primary)) {
         // create OllamaProvider last (discoverModels is still timeboxed in provider)
         providers.push(new OllamaProvider());
@@ -103,15 +109,17 @@ function redact(key?: string) {
 app.get('/api/secrets', async (req, res) => {
     const openrouter = await getSecret('openrouter');
     const hf = await getSecret('hf');
+    const openai = await getSecret('openai');
     res.json({
         openrouter: redact(openrouter),
-        hf: redact(hf)
+        hf: redact(hf),
+        openai: redact(openai)
     });
 });
 
 // Save secrets
 app.post('/api/secrets', async (req, res) => {
-    const { openrouter, hf } = req.body;
+    const { openrouter, hf, openai } = req.body;
     try {
         if (openrouter && !openrouter.includes('...')) {
             await fs.mkdir(SECRETS_DIR, { recursive: true });
@@ -122,6 +130,11 @@ app.post('/api/secrets', async (req, res) => {
             await fs.mkdir(SECRETS_DIR, { recursive: true });
             await fs.writeFile(path.join(SECRETS_DIR, 'hf.txt'), hf.trim());
             console.log(chalk.green('[Secrets] Updated Hugging Face API Key.'));
+        }
+        if (openai && !openai.includes('...')) {
+            await fs.mkdir(SECRETS_DIR, { recursive: true });
+            await fs.writeFile(path.join(SECRETS_DIR, 'openai.txt'), openai.trim());
+            console.log(chalk.green('[Secrets] Updated OpenAI API Key.'));
         }
         res.json({ success: true });
     } catch (error: any) {
