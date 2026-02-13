@@ -4,7 +4,7 @@ SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant
 
 Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control. 
 
-> *If you need something added, just ask it to do it—it will do it.*
+> *If you need something added or a new tool , just ask it to do it—it will do it.*
 
 > [!CAUTION]
 > **UNRESTRICTED EVOLUTION**: SimpleClaw is designed to be fundamentally self-evolving. The assistant has the freedom to create new tools, modify existing code, and even rewrite its own source. This is powerful but **DAREGEROUS**. Safety rails are almost non-existent by design. Use with extreme caution and have fun.
