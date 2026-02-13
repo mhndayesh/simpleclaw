@@ -27,7 +27,7 @@
 
 # SimpleClaw 🦞
 
-SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a gateway to local models (via Ollama) and remote providers (OpenRouter, HuggingFace), providing both a Command Line Interface (CLI) and a modern Web UI.
+SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a gateway to local models (via Ollama) and remote providers (OpenAi, OpenRouter, HuggingFace), providing both a Command Line Interface (CLI) and a modern Web UI.
 
 Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control. 
 
