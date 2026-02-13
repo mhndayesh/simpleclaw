@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const SetupWizard = ({ onComplete }) => {
     const [step, setStep] = useState(1);
-    const [secrets, setSecrets] = useState({ openrouter: '', hf: '' });
+    const [secrets, setSecrets] = useState({ openrouter: '', hf: '', openai: '' });
     const [models, setModels] = useState([]);
     const [config, setConfig] = useState({ primary: null, fallback: null });
     const [manualMode, setManualMode] = useState({ primary: false, fallback: false });
@@ -98,7 +98,7 @@ const SetupWizard = ({ onComplete }) => {
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                             <Shield size={24} /> API Credentials
                         </h2>
-                        <p style={{ opacity: 0.6, marginBottom: '2rem', fontSize: '0.9rem' }}>Add your keys to enable cloud models via OpenRouter or HuggingFace. Local Ollama models are detected automatically.</p>
+                        <p style={{ opacity: 0.6, marginBottom: '2rem', fontSize: '0.9rem' }}>Add your keys to enable cloud models via OpenRouter, OpenAI or HuggingFace. Local Ollama models are detected automatically.</p>
 
                         <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{
@@ -127,6 +127,17 @@ const SetupWizard = ({ onComplete }) => {
                                 />
                             </div>
                             <div>
+                                <label style={{ fontSize: '0.75rem', opacity: 0.8, marginBottom: '0.4rem', display: 'block' }}>OpenAI API Key (Optional)</label>
+                                <input
+                                    type="password"
+                                    className="glass"
+                                    placeholder="sk-..."
+                                    value={secrets.openai}
+                                    onChange={(e) => setSecrets(prev => ({ ...prev, openai: e.target.value }))}
+                                    style={{ width: '100%', padding: '1rem', borderRadius: 'var(--radius)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent' }}
+                                />
+                            </div>
+                            <div>
                                 <label style={{ fontSize: '0.75rem', opacity: 0.8, marginBottom: '0.4rem', display: 'block' }}>Hugging Face Key (Optional)</label>
                                 <input
                                     type="password"
@@ -147,7 +158,7 @@ const SetupWizard = ({ onComplete }) => {
                     </div>
                 );
             case 3: {
-                const providers = ['ollama', 'openrouter', 'huggingface'];
+                const providers = ['ollama', 'openrouter', 'openai', 'huggingface'];
                 const renderSelector = (type) => {
                     const current = config[type] || {};
                     const filteredModels = models.filter(m => m.provider === current.provider);
