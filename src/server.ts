@@ -37,16 +37,34 @@ async function getSecret(name: string): Promise<string | undefined> {
 }
 
 async function getProviders(): Promise<Provider[]> {
-    const providers: Provider[] = [new OllamaProvider()];
+    const configManager = new ConfigManager();
+    const config = await configManager.load();
 
     const openRouterKey = await getSecret('openrouter');
-    if (openRouterKey) {
-        providers.push(new OpenRouterProvider(openRouterKey));
+    const hfKey = await getSecret('hf');
+
+    const providers: Provider[] = [];
+
+    // If a primary is explicitly configured, prefer it (if credentials available for cloud providers)
+    if (config.primary && config.primary.provider) {
+        if (config.primary.provider === 'openrouter' && openRouterKey) providers.push(new OpenRouterProvider(openRouterKey));
+        else if (config.primary.provider === 'huggingface' && hfKey) providers.push(new HuggingFaceProvider(hfKey));
+        else if (config.primary.provider === 'ollama') providers.push(new OllamaProvider());
     }
 
-    const hfKey = await getSecret('hf');
-    if (hfKey) {
-        providers.push(new HuggingFaceProvider(hfKey));
+    // Add any other available cloud providers (avoid duplicating the primary)
+    if (openRouterKey && !providers.find(p => p instanceof OpenRouterProvider)) providers.push(new OpenRouterProvider(openRouterKey));
+    if (hfKey && !providers.find(p => p instanceof HuggingFaceProvider)) providers.push(new HuggingFaceProvider(hfKey));
+
+    // Only include Ollama if explicitly referenced in config (primary or fallback) or
+    // when there are no cloud providers available and no explicit primary —
+    // this avoids probing Ollama on every startup when cloud keys are present.
+    const wantOllamaExplicit = (config.primary && config.primary.provider === 'ollama')
+        || (config.fallback && config.fallback.provider === 'ollama');
+    const hasCloud = !!openRouterKey || !!hfKey;
+    if (wantOllamaExplicit || (!hasCloud && !config.primary)) {
+        // create OllamaProvider last (discoverModels is still timeboxed in provider)
+        providers.push(new OllamaProvider());
     }
 
     return providers;
@@ -133,8 +151,19 @@ app.get('/api/setup-status', async (req, res) => {
         const openrouter = await getSecret('openrouter');
         const hf = await getSecret('hf');
 
+        // Probe Ollama but don't block indefinitely — timebox the discovery.
         const ollamaProvider = new OllamaProvider();
-        const ollamaModels = await ollamaProvider.discoverModels();
+        const discoverWithTimeout = async (p: any, ms = 800) => {
+            try {
+                const timeout = new Promise<any>(resolve => setTimeout(() => resolve([]), ms));
+                const result = await Promise.race([p.discoverModels(), timeout]);
+                return Array.isArray(result) ? result : [];
+            } catch {
+                return [];
+            }
+        };
+
+        const ollamaModels = await discoverWithTimeout(ollamaProvider, 800);
         const hasOllama = ollamaModels.length > 0;
 
         if (hasOllama) {
