@@ -1,5 +1,8 @@
 # SimpleClaw 🦞
 
+> [!IMPORTANT]
+> **VIBE CODED DISCLAIMER**: This project is built by an average person using "Vibe Coding" principles. It works, it evolves, and it is powerful—but it is NOT examples of "top-tier engineering." Expect rough edges, experimental logic, and a focus on "getting it done" over architectural perfection. 🌊🧪
+
 <div align="center">
   <img src="https://img.shields.io/badge/Version-1.2.0-blue?style=for-the-badge&logo=github" alt="Version 1.2.0">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT">
