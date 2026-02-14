@@ -36,6 +36,15 @@ Choose the profile that fits your specific operational needs:
 
 | Mode | Alias | Focus | Prompt Injection | Token Est. | Cost |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Super-Eco** | `ghost` | Speed | Pin-point Summary | ~200 - 500 | 👻 Ultra Low |
+| **Eco** | `operative` | Efficiency | Persona + LEGO Lane | ~1k - 2k | 🪙 Efficient |
+| **Standard** | `assistant` | Productivity | Persona + Toolbox | ~3k - 8k | 💳 Standard |
+| **Full-Context** | `engineer` | R&D | All LEGO Bricks | ~10k - 128k+ | 💎 Premium |
+
+---
+
+## 🧱 Brick Architecture (LEGO)
+SimpleClaw uses a modular instruction system to save tokens. Instead of sending thousands of lines of rules every time, the Agent only loads what it needs.
 
 - **On-Demand Loading**: Use `<GET_LEGO name="bricks_name" />` to load specific instruction blocks.
 - **Available Bricks**: `core_persona`, `toolbox`, `project_map`, `protocols`.
