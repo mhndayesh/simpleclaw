@@ -1,20 +1,11 @@
 @echo off
 echo [SETUP] Initializing SimpleClaw...
 
-:: 1. Install Dependencies
-echo [SETUP] Installing dependencies...
-call npm install
+:: 1. Run System Setup
+echo [SETUP] Running full system setup (this may take a few minutes)...
+call npm run setup
 if %errorlevel% neq 0 (
-    echo [ERROR] npm install failed.
-    pause
-    exit /b %errorlevel%
-)
-
-:: 2. Build Project
-echo [SETUP] Building project...
-call npm run build
-if %errorlevel% neq 0 (
-    echo [ERROR] Build failed.
+    echo [ERROR] Setup failed.
     pause
     exit /b %errorlevel%
 )
