@@ -10,10 +10,11 @@ const App = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [models, setModels] = useState([]);
-  const [config, setConfig] = useState({ primary: null, fallback: null });
+  const [config, setConfig] = useState({ primary: null, fallback: null, summarizer: null, summarizerEnabled: false });
   const [status, setStatus] = useState('Checking connectivity...');
   const [mode, setMode] = useState(localStorage.getItem('simpleclaw-mode') || 'super-eco');
-  const [manualMode, setManualMode] = useState({ primary: false, fallback: false });
+  const [manualMode, setManualMode] = useState({ primary: false, fallback: false, summarizer: false });
+
   const [secrets, setSecrets] = useState({ openrouter: '', hf: '', openai: '' });
   const [saveStatus, setSaveStatus] = useState('');
   const [isSetup, setIsSetup] = useState(null); // null = checking, false = show wizard
@@ -166,9 +167,11 @@ const App = () => {
   };
 
   const saveConfig = async () => {
+    console.log('[UI] Saving Config:', config);
     setSaveStatus('Saving config...');
     try {
       await axios.post('/api/config', config);
+
       setSaveStatus('Config Saved!');
       setTimeout(() => setSaveStatus(''), 2000);
     } catch (err) {
@@ -185,11 +188,19 @@ const App = () => {
     return (
       <section className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {type === 'primary' ? <Cpu size={18} /> : <Layers size={18} />}
-            <h3>{type.charAt(0).toUpperCase() + type.slice(1)} Choice</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {type === 'primary' ? <Cpu size={18} /> : (type === 'summarizer' ? <Activity size={18} /> : <Layers size={18} />)}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <h3 style={{ margin: 0 }}>{type === 'summarizer' ? 'Mechanical Summarizer' : (type.charAt(0).toUpperCase() + type.slice(1))} Model</h3>
+              {type === 'summarizer' && (
+                <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>
+                  {config.summarizerEnabled ? 'Currently ACTIVE (Dedicated)' : 'Currently INACTIVE (Unified)'}
+                </span>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
+
             <button
               className="btn glass"
               style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }}
@@ -198,13 +209,35 @@ const App = () => {
             >
               <RefreshCw size={14} /> Refresh
             </button>
-            <button
-              className={`btn ${manualMode[type] ? 'btn-primary' : 'glass'}`}
-              style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }}
-              onClick={() => setManualMode(prev => ({ ...prev, [type]: !prev[type] }))}
-            >
-              <PlusCircle size={14} /> {manualMode[type] ? 'Auto' : 'Manual'}
-            </button>
+            {type === 'summarizer' ? (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className={`btn ${config.summarizerEnabled ? 'btn-danger' : 'btn-primary'}`}
+                  style={{
+                    fontSize: '0.9rem',
+                    padding: '0.6rem 1.2rem',
+                    minWidth: '140px',
+                    fontWeight: 'bold',
+                    border: '2px solid rgba(255,255,255,0.1)',
+                    boxShadow: config.summarizerEnabled ? '0 0 20px rgba(239, 68, 68, 0.3)' : '0 0 20px rgba(var(--primary), 0.3)'
+                  }}
+                  onClick={() => {
+                    const newState = !config.summarizerEnabled;
+                    setConfig(prev => ({ ...prev, summarizerEnabled: newState }));
+                  }}
+                >
+                  {config.summarizerEnabled ? '🔴 SWITCH OFF' : '🟢 SWITCH ON'}
+                </button>
+              </div>
+            ) : (
+              <button
+                className={`btn ${manualMode[type] ? 'btn-primary' : 'glass'}`}
+                style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }}
+                onClick={() => setManualMode(prev => ({ ...prev, [type]: !prev[type] }))}
+              >
+                <PlusCircle size={14} /> {manualMode[type] ? 'Auto' : 'Manual'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -393,7 +426,9 @@ const App = () => {
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Shield size={24} /> Neural Configuration</h2>
 
             <ModelSelector type="primary" />
+            <ModelSelector type="summarizer" />
             <ModelSelector type="fallback" />
+
 
             <button className="btn btn-primary" onClick={saveConfig} style={{ width: '100%', justifyContent: 'center', padding: '1.2rem', marginTop: '1rem', fontSize: '1.1rem' }}>
               <Save size={20} /> Save Neural Configuration

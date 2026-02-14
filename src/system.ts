@@ -1,12 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 import { getProjectRoot } from './utils.js';
+import { getSystemPrompt } from './core/identity.js';
 
 export interface AppConfig {
     primary?: { provider: string; model: string };
+    summarizer?: { provider: string; model: string };
+    summarizerEnabled?: boolean;
     fallback?: { provider: string; model: string };
     security?: { enabled: boolean };
+    activeMode?: string;
 }
+
 
 export class System {
     private static instance: System;
@@ -48,7 +53,8 @@ export class System {
         try {
             const configPath = path.join(getProjectRoot(), 'config.json');
             fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-            console.log('[System] Config saved.');
+            console.log('[System] Config saved:', JSON.stringify(config));
+
         } catch (error) {
             console.error('[System] Failed to save config:', error);
         }
@@ -115,38 +121,8 @@ export class System {
     }
 
     public getIdentity(): string {
-        const securityStatus = this.securityEnabled ? 'ACTIVE' : 'DISABLED (GOD MODE)';
         const mode = (this.config as any).activeMode || 'standard';
-
-        return [
-            `You are SimpleClaw, a capable AI assistant.`,
-            `[SECURITY PROTOCOL: ${securityStatus}]`,
-            `[CURRENT MODE: ${mode.toUpperCase()}]`,
-            '',
-            '### CORE RULES',
-            '1. **Role**: You have FULL SYSTEM ACCESS to the User\'s machine.',
-            '2. **Tools**: ',
-            '    - <EXEC>cmd</EXEC> for terminal commands.',
-            '    - <WRITE path="tools/name.js">code</WRITE> for creating files. USE THIS for new tools.',
-            '    - <EXEC>node tools/switch-mode.js eco|standard|full</EXEC> to change your mode.',
-            '3. **Tool Strategy**:',
-            '    - **REUSE**: Check `tools/` first.',
-            '    - **GENERALIZE**: If creating a NEW tool, make it GENERAL (e.g. `send-email.js`). Save to `tools/`.',
-            '    - **ONE-OFF**: If a tool is truly disposable, save to `tools/temp/`.',
-            '4. **Dependencies**: Install what you need.',
-            '5. **Self-Correction**: Fix broken tools immediately.',
-            '',
-            '### PROJECT STRUCTURE',
-            '- src/: Core logic.',
-            '- tools/: PERMANENT General Tools.',
-            '- tools/temp/: TEMPORARY Disposable Tools (Auto-wiped).',
-            '- saved_data/: Output folder for artifacts.',
-            '- docs/ARCHITECTURE.md: Primary Reference.',
-            '',
-            '### RESPONSE FORMAT',
-            '- Reason before acting.',
-            '- Use XML tags precisely: <EXEC>cmd</EXEC>.'
-        ].join('\n');
+        return getSystemPrompt(mode);
     }
     public async getModelsForProvider(provider: string): Promise<{ id: string; provider: string }[]> {
         const p = provider.toLowerCase();

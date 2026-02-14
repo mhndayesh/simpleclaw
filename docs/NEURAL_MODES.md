@@ -25,10 +25,13 @@ Unrestricted power for complex problem-solving.
 
 ---
 
-## How it Works: Mode-Aware Compaction
-SimpleClaw doesn't just "forget" old messages. When compaction is triggered (in `super-eco` and `standard`):
-1.  It identifies the "cutoff" point for raw messages.
-2.  It groups older messages (User/Assistant pairs).
-3.  It converts these groups into `system` summary messages that look like this:
-    `[standard Summary] (user) How do I... | (assistant) You should use...`
-4.  This allows the model to still "remember" the broad strokes of the conversation without wasting thousands of tokens on exact wording.
+## How it Works: Tiered Summarization
+SimpleClaw uses a **5-turn trigger** to keep context windows short. When triggered:
+1.  **Selection**: The system checks if the **Mechanical Summarizer Switch** is ON. If so, it uses the dedicated engine.
+2.  **Prompting**: A mode-specific prompt is sent:
+    - `super-eco`: "Pin-point summary: errors/results only. Max 3 lines."
+    - `eco`: "Brief bullets: Issue/Solution/Progress."
+    - `standard`: "Detailed bullets: Steps taken/current status."
+3.  **Compaction**: Active memory is pruned. Only the `system` identity, the latest `sessionSummary`, and the last few exchanges are kept.
+4.  **Isolation**: On reset, the current summary is saved to `storage/sessions/` and memory is wiped clean.
+

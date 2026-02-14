@@ -40,10 +40,13 @@ Built with a focus on **portability** and **self-evolution**, SimpleClaw allows 
 
 - **🧩 Smart Sanitization**: Automatically strips internal "thinking" and technical XML tags from user-facing chat for a cleaner experience.
 - **🚥 Request Queuing**: Serializes chat requests per session to prevent race conditions and memory corruption.
-- **🛰️ Background Tasks**: Support for non-blocking command execution with asynchronous result reporting in subsequent turns.
-- **🔍 Advanced Search**: Integrated codebase search with support for file extensions, exclusion patterns, and content grepping.
-- **Smart Memory Profiles**: Choose between `super-eco` (low tokens), `standard`, and `full-context` modes.
+- **🛰️ Background Tasks**: Support for non-blocking command execution with asynchronous result reporting.
+- **🔍 Advanced Search**: Integrated codebase search with support for file extensions and content grepping.
+- **🧱 Tiered Memory Summarization**: New mode-specific summarization intensities (Super-Eco, Eco, Standard) for high token efficiency.
+- **🔘 Mechanical Summarizer Switch**: Explicitly toggle between primary and dedicated models for background tasks to save tokens.
+- **🛡️ Passive isolation**: Every session is archived and starts with a clean slate for maximum privacy and performance.
 - **Portability First**: Absolute path-agnostic architecture—run SimpleClaw from any folder on any machine.
+
 - **One-Click Setup**: Automated installer handles paths, dependencies, and builds for you.
 
 > [!TIP]

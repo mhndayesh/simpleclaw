@@ -14,10 +14,11 @@ export class LLM {
         this.system = System.getInstance();
     }
 
-    public async chat(messages: { role: string, content: string }[]): Promise<{ content: string, usage: Usage }> {
-        const primary = this.system.config.primary;
-        const provider = primary?.provider || 'ollama';
-        const model = primary?.model || 'llama3';
+    public async chat(messages: { role: string, content: string }[], type: 'primary' | 'summarizer' = 'primary'): Promise<{ content: string, usage: Usage }> {
+        const config = (this.system.config as any)[type] || this.system.config.primary;
+        const provider = config?.provider || 'ollama';
+        const model = config?.model || 'llama3';
+
         const secrets = this.system.getSecrets();
 
         let url = 'http://localhost:11434/api/chat';

@@ -15,6 +15,8 @@ echo [SETUP] Creating tools directory...
 if not exist "tools" mkdir tools
 if not exist "tools\temp" mkdir tools\temp
 if not exist "saved_data" mkdir saved_data
+if not exist "storage" mkdir storage
+if not exist "storage\sessions" mkdir storage\sessions
 
 echo [SETUP] Complete! You can now run 'start.bat'.
 pause

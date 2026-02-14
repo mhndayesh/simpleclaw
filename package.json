@@ -1,6 +1,6 @@
 {
   "name": "simpleclaw",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "<div style=\"font-size: 2em; font-weight: bold; text-align: center;\">\r   Neural Modes\r </div>",
   "type": "module",
   "scripts": {

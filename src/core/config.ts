@@ -9,7 +9,9 @@ export interface ModelPreference {
 
 export interface AppConfig {
     primary?: ModelPreference;
+    summarizer?: ModelPreference;
     fallback?: ModelPreference;
+
     setupComplete?: boolean;
     security?: {
         enabled: boolean;

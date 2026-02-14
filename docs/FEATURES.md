@@ -9,7 +9,9 @@ SimpleClaw isn't just a model picker; it's a complete local AI ecosystem. Below 
     - `super-eco`: Ultra-fast, low-context logic.
     - `standard`: Balanced Turn-based assistance.
     - `full-context`: Unrestricted engineering mode.
+- **Mechanical Summarizer Switch**: Dedicated model compute gate for background tasks.
 - **Model Fallbacks**: Automatic "Plan B" if your primary model fails or is offline.
+
 
 ## 🛠️ Assistant Capabilities (The Tool Loop)
 - **Active Self-Mutation**: The assistant can rewrite its own code (source files in `src/` and `ui/`).
@@ -21,7 +23,9 @@ SimpleClaw isn't just a model picker; it's a complete local AI ecosystem. Below 
 - **Root Calibration Engine**: Self-correcting absolute path detection via `setup.bat`.
 - **Zero-Absolute Persistence**: Session data and settings are strictly relative to the project home.
 - **Local-First Storage**: No cloud databases required; all memory is stored in transparent JSON files.
-- **Session Archiving**: Automatic timestamp-based archiving when starting new chats.
+- **Passive Isolation Protocol**: Every reset archives the session and wipes memory to 0, ensuring a fresh context.
+- **Session Archiving**: Automatic storage of summaries and usage stats in `storage/sessions/`.
+
 
 ## 💻 Interfaces
 - **Universal CLI**: Fully functional command-line terminal with memory and tool support.

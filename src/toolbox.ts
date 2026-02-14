@@ -56,9 +56,37 @@ export class Toolbox {
         try {
             console.log(`[EXEC] ${command}`);
             const { stdout, stderr } = await execAsync(command, { cwd: getProjectRoot() });
-            return stdout || stderr;
+            return (stdout || stderr) || 'Command completed with no output.';
         } catch (error: any) {
             return `Execution failed: ${error.message}`;
+        }
+    }
+
+    public async readTool(filePath: string): Promise<string> {
+        try {
+            const fullPath = path.join(getProjectRoot(), filePath);
+            if (!fs.existsSync(fullPath)) return `Error: File ${filePath} not found.`;
+            const stats = fs.statSync(fullPath);
+            if (stats.isDirectory()) return `Error: ${filePath} is a directory. Use LIST instead.`;
+
+            return fs.readFileSync(fullPath, 'utf-8');
+        } catch (error: any) {
+            return `Read failed: ${error.message}`;
+        }
+    }
+
+    public async listTool(dirPath: string): Promise<string> {
+        try {
+            const fullPath = path.join(getProjectRoot(), dirPath);
+            if (!fs.existsSync(fullPath)) return `Error: Directory ${dirPath} not found.`;
+
+            const files = fs.readdirSync(fullPath);
+            return files.map(f => {
+                const isDir = fs.statSync(path.join(fullPath, f)).isDirectory();
+                return isDir ? `[DIR] ${f}` : f;
+            }).join('\n');
+        } catch (error: any) {
+            return `List failed: ${error.message}`;
         }
     }
 

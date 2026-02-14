@@ -4,14 +4,15 @@ This document serves as the primary reference for the SimpleClaw agent's interna
 
 ## 1. Core System (`src/core/`)
 
-- **Identity (`identity.ts`)**: Manages the system prompt, including "God Mode" status and tool auto-discovery.
-- **Memory (`memory.ts`)**: Handles conversation history and per-session storage.
-- **LLM Service (`llm-service.ts`)**: Centralized LLM interaction with built-in **fallback logic** (Primary -> Fallback).
+- **Identity (`identity.ts`)**: Manages the system prompt, including "God Mode" status and Lego-based instructions.
+- **Agent (`agent.ts`)**: The core engine. Manages conversation history, tiered summarization, and task loops.
+- **LLM Context (`llm.ts`)**: Centralized LLM interaction with built-in **fallback logic** (Primary -> Fallback) and provider detection.
 - **Security (`security.ts`)**:
   - **Modes**: Interactive (CLI) vs. Strict (Server).
   - **Toggle**: Can be disabled via `config.json` (`"security": { "enabled": false }`).
-- **Config (`config.ts`)**: Manages `config.json` preferences.
-- **Tools (`tools.ts`)**: XML parsing and execution logic for `<EXEC>` and `<WRITE>`.
+- **Config (`config.ts`)**: Manages `config.json` and the **Mechanical Summarizer Switch**.
+- **Toolbox (`toolbox.ts`)**: Discovery and execution logic for all system and temporary tools.
+
 
 ## 2. Server & Lanes (`src/server.ts`)
 
@@ -39,6 +40,13 @@ The server uses a **Lane-based Command Queue** system:
 - `OPENROUTER_API_KEY`: For OpenRouter access.
 - `HF_TOKEN`: For HuggingFace access.
 
-## 6. Context Guard
+## 6. Memory & Summarization
 
-- A tokenizer-based guard ensures conversation history stays within safe limits (token window management).
+- **Tiered Strategy**: summarization triggers every 5 turns.
+- **Intensities**: 
+  - `super-eco`: Pin-point (3 lines).
+  - `eco`: Concise bullets (Issues/Solutions).
+  - `standard`: Detailed bullets (Full logs).
+- **Mechanical Switch**: Dedicated model compute for background tasks (`summarizerEnabled`).
+- **Isolation**: Every reset archives to `storage/sessions` and wipes active memory.
+

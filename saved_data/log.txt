@@ -1,0 +1,10 @@
+Your log message
+your message
+Your log entry
+Your log entry
+Your log entry
+Your log entry
+Your log entry
+your message
+Your log entry
+HELLO_WORLD

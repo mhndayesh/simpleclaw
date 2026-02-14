@@ -14,6 +14,11 @@ echo [RESET] Cleaning temp tools...
 if exist "tools\temp" rmdir /s /q "tools\temp"
 mkdir "tools\temp"
 
+:: 4. Clear Sessions (Preserve directory structure)
+echo [RESET] Cleaning session archives...
+if exist "storage\sessions" rmdir /s /q "storage\sessions"
+mkdir "storage\sessions"
+
 :: 4. Rebuild
 echo [RESET] Rebuilding system...
 call npm run build
