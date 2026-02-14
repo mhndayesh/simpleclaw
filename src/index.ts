@@ -47,6 +47,17 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+app.get('/api/models', async (req, res) => {
+    try {
+        const providers = ['ollama', 'openrouter', 'openai', 'huggingface'];
+        const results = await Promise.all(providers.map(p => system.getModelsForProvider(p)));
+        const allModels = results.flat();
+        res.json(allModels);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/api/models/:provider', async (req, res) => {
     try {
         const { provider } = req.params;

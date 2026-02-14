@@ -494,7 +494,7 @@ const App = () => {
       </main >
 
       <footer style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.8rem', opacity: 0.4 }}>
-        SimpleClaw v1.1.0 • Final Choice Edition • {new Date().toLocaleDateString()}
+        SimpleClaw v1.2.0 • Final Choice Edition • {new Date().toLocaleDateString()}
       </footer>
     </div >
   );
