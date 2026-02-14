@@ -7,14 +7,10 @@ if not exist "dist\index.js" (
     call npm run setup
 )
 
-:: 2. Launch Backend (This now serves the UI!)
-echo [START] Launching SimpleClaw...
-start "SimpleClaw" node dist/index.js
+:: 2. Background Browser Opener
+echo [START] Opening Browser at http://localhost:3001 in 3 seconds...
+start /b cmd /c "timeout /t 3 /nobreak >NUL && start http://localhost:3001"
 
-:: 3. Wait & Open
-timeout /t 5 /nobreak >NUL
-echo [START] Opening Browser at http://localhost:3001
-start http://localhost:3001
-
-echo [START] System active.
-exit
+:: 3. Launch Backend in Foreground
+echo [START] Launching SimpleClaw in this terminal...
+node dist/index.js
