@@ -1,27 +1,20 @@
 @echo off
 echo [START] SimpleClaw Sequential Launch...
 
-:: 1. Build Backend
+:: 1. Build Check
 if not exist "dist\index.js" (
-    echo [START] Building Backend...
-    call npm run build
+    echo [START] First-time build required...
+    call npm run setup
 )
 
-:: 2. Launch Backend (Port 3001)
-echo [START] Launching Backend Server...
-start "SimpleClaw Backend" node dist/index.js
+:: 2. Launch Backend (This now serves the UI!)
+echo [START] Launching SimpleClaw...
+start "SimpleClaw" node dist/index.js
 
-:: 3. Wait for Backend
-timeout /t 3 /nobreak >NUL
-
-:: 4. Launch Frontend (Port 3000)
-echo [START] Launching UI Server (Vite)...
-start "SimpleClaw UI" cmd /c "cd ui && npm run dev"
-
-:: 5. Wait & Open Browser
+:: 3. Wait & Open
 timeout /t 5 /nobreak >NUL
-echo [START] Opening Browser...
-start http://localhost:3000
+echo [START] Opening Browser at http://localhost:3001
+start http://localhost:3001
 
-echo [START] Both servers running.
+echo [START] System active.
 exit
