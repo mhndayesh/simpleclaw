@@ -1,107 +1,88 @@
 # SimpleClaw 🦞
 
-<div style="font-size: 2em; font-weight: bold; text-align: center;">
-  Neural Modes
+<div align="center">
+  <img src="https://img.shields.io/badge/Version-1.2.0-blue?style=for-the-badge&logo=github" alt="Version 1.2.0">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT">
+  <img src="https://img.shields.io/badge/Status-Production--Ready-orange?style=for-the-badge" alt="Production Ready">
 </div>
 
-<div style="font-size: 1.2em; text-align: center;">
-  Choose the mode that fits your needs:
-</div>
+<br />
 
-<div style="display: flex; justify-content: space-around; margin-top: 20px;">
-  <div>
-    <div style="font-size: 1.5em; font-weight: bold;">Super-Eco (The Ghost)</div>
-    <div style="font-size: 1em;">Maximum speed, minimum token usage. Best for quick questions and simple tasks.</div>
-  </div>
-  <div>
-    <div style="font-size: 1.5em; font-weight: bold;">Standard (The Assistant)</div>
-    <div style="font-size: 1em;">Balanced experience for general coding tasks and debugging.</div>
-  </div>
-  <div>
-    <div style="font-size: 1.5em; font-weight: bold;">Full-Context (The Engineer)</div>
-    <div style="font-size: 1em;">Unrestricted power for complex problem-solving. Use with caution!</div>
-  </div>
-</div>
+SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a unified gateway to local models (via **Ollama**) and remote providers (**OpenAI, OpenRouter, HuggingFace**), providing both a Command Line Interface (CLI) and a modern Web UI.
 
-<br>
-
-# SimpleClaw 🦞
-
-SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a gateway to local models (via Ollama) and remote providers (OpenAi, OpenRouter, HuggingFace), providing both a Command Line Interface (CLI) and a modern Web UI.
-
-Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control. 
-
-> *If you need something added or a new tool , just ask it to do it—it will do it.*
+Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control.
 
 > [!CAUTION]
-> **UNRESTRICTED EVOLUTION**: SimpleClaw is designed to be fundamentally self-evolving. The assistant has the freedom to create new tools, modify existing code, and even rewrite its own source. This is powerful but **DAREGEROUS**. Safety rails are almost non-existent by design. Use with extreme caution and have fun.
+> **UNRESTRICTED EVOLUTION**: SimpleClaw is designed to be fundamentally self-evolving. The assistant has the freedom to create new tools, modify existing code, and even rewrite its own source. Safety rails are almost non-existent by design. Use with extreme caution.
 
-## 🚀 Key Features
+---
 
-- **🧩 Smart Sanitization**: Automatically strips internal "thinking" and technical XML tags from user-facing chat for a cleaner experience.
-- **🚥 Request Queuing**: Serializes chat requests per session to prevent race conditions and memory corruption.
+## 🧠 Neural Modes
+Choose the profile that fits your specific operational needs:
+
+| Mode | Alias | Focus | Intensity |
+| :--- | :--- | :--- | :--- |
+| **Super-Eco** | `ghost` | Speed & Cost | Extreme Compression |
+| **Standard** | `assistant` | Productivity | Balanced Context |
+| **Full-Context** | `engineer` | R&D | Unrestricted Memory |
+
+---
+
+## 🚀 Key Features (v1.2.0)
+
+- **🔘 Mechanical Summarizer Switch**: Explicitly toggle between primary and dedicated models for background tasks to optimize compute.
+- **🧱 Tiered Memory Summarization**: Mode-specific summarization triggers every 5 turns for maximum token efficiency.
+- **🛡️ Passive Isolation**: Every session starts with a clean slate; archives are kept in `storage/sessions/` for opt-in retrieval only.
+- **🚥 Request Queuing**: Serializes chat requests per session to prevent race conditions.
 - **🛰️ Background Tasks**: Support for non-blocking command execution with asynchronous result reporting.
 - **🔍 Advanced Search**: Integrated codebase search with support for file extensions and content grepping.
-- **🧱 Tiered Memory Summarization**: New mode-specific summarization intensities (Super-Eco, Eco, Standard) for high token efficiency.
-- **🔘 Mechanical Summarizer Switch**: Explicitly toggle between primary and dedicated models for background tasks to save tokens.
-- **🛡️ Passive isolation**: Every session is archived and starts with a clean slate for maximum privacy and performance.
-- **Portability First**: Absolute path-agnostic architecture—run SimpleClaw from any folder on any machine.
+- **Portability First**: Absolute path-agnostic architecture—run SimpleClaw from any folder.
 
-- **One-Click Setup**: Automated installer handles paths, dependencies, and builds for you.
-
-> [!TIP]
-> **Deep Documentation**: For technical details on the API, Core Engine, and Neural Modes, see the **[Full Documentation Suite](docs/README.md)**.
+---
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
-- [Ollama](https://ollama.com/) (Optional, for local model support)
+- **Node.js**: v18 or higher
+- **npm / pnpm**: Latest
+- **Ollama**: (Optional) For local model support
 
 ### Installation
+SimpleClaw is calibrated with a single command:
 
-SimpleClaw is designed to be installed and calibrated with a single command:
-
-1. Clone or download this repository.
-2. Open a terminal in the project root.
-3. Run the setup script:
+1. Clone or download the repository.
+2. Run the setup script:
    ```batch
    setup.bat
    ```
-   *This will automatically install dependencies, recalibrate paths for your machine, build the project, and launch the UI.*
+*This will install dependencies, recalibrate paths, build the project, and launch the UI.*
+
+---
 
 ## 📖 Usage
 
-### Using the Web UI
-The UI will automatically launch at `http://localhost:5173` after setup. It features:
-- **Provider Management**: Redacted API key management directly in the browser.
-- **Interactive Chat**: Real-time interaction with your selected models.
-- **Session Control**: Archive and manage multiple conversation histories.
+### Web UI
+Launch at `http://localhost:3000` (proxied via Vite).
+- **Settings**: Manage API keys and Neural Configuration.
+- **Mechanical Control**: Toggle the dedicated summarizer engine with one click.
 
-### Using the CLI
-You can interact with SimpleClaw directly from your terminal using `simpleclaw.bat`:
+### CLI
+Interact directly from the terminal:
 ```batch
-simpleclaw list                      # List all discovered models
-simpleclaw chat -m llama3.1 -q "Hi"  # Quick chat with a specific model
-simpleclaw setup                     # Reset the UI wizard
+simpleclaw chat -m llama3.1 -q "Status report"
+simpleclaw list
 ```
 
+---
+
 ## 🏗️ Architecture
-
-SimpleClaw is built with:
 - **Backend**: Node.js & Express (TypeScript)
-- **Frontend**: React & Vite (Modern Aesthetics)
-- **Data**: Local JSON-based storage for sessions and configuration.
-
-## 🛡️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **Frontend**: React & Vite
+- **Data**: Transparent JSON-based storage (no cloud DB required).
 
 ## 🙏 Acknowledgments
-
-SimpleClaw is proudly inspired by **[OpenClaw](https://github.com/openclaw/openclaw)**. We thank the OpenClaw community for their pioneering work in personal AI systems. SimpleClaw aims to provide a simplified, user-first experience built on those foundational ideas.
+SimpleClaw is proudly inspired by **[OpenClaw](https://github.com/openclaw/openclaw)**. We thank the community for their pioneering work.
 
 **Contact**: [mhndayesh@gmail.com](mailto:mhndayesh@gmail.com)
+
 
