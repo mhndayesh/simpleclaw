@@ -1,52 +1,40 @@
-# SimpleClaw Architecture Reference
+# SimpleClaw System Architecture (v1.2.0) 🏛️
 
-This document serves as the primary reference for the SimpleClaw agent's internal architecture, capabilities, and workflows.
+SimpleClaw is architected for **Self-Evolution** and **Portability**. This document provides a high-level overview of how the components interact.
 
-## 1. Core System (`src/core/`)
+## 📡 The Big Picture
+```mermaid
+graph TD
+    User((User)) -->|Rest/Web| UI[React/Vite Frontend]
+    User -->|Local/Batch| CLI[CLI Entry Point]
+    UI -->|HTTP 3001| API[Express API Server]
+    CLI -->|Direct| AG[Agent Engine]
+    API -->|Chat Loop| AG
+    AG -->|Re-Act Loop| TB[Toolbox]
+    AG -->|Context| SM[Session Memory]
+    TB -->|FS/Exec| OS((Operating System))
+    OS -->|Output| TB
+```
 
-- **Identity (`identity.ts`)**: Manages the system prompt, including "God Mode" status and Lego-based instructions.
-- **Agent (`agent.ts`)**: The core engine. Manages conversation history, tiered summarization, and task loops.
-- **LLM Context (`llm.ts`)**: Centralized LLM interaction with built-in **fallback logic** (Primary -> Fallback) and provider detection.
-- **Security (`security.ts`)**:
-  - **Modes**: Interactive (CLI) vs. Strict (Server).
-  - **Toggle**: Can be disabled via `config.json` (`"security": { "enabled": false }`).
-- **Config (`config.ts`)**: Manages `config.json` and the **Mechanical Summarizer Switch**.
-- **Toolbox (`toolbox.ts`)**: Discovery and execution logic for all system and temporary tools.
+## 📂 Module Responsibility
+- **`src/system.ts`**: The Singleton "Brain Stem". Handles configuration (`config.json`), global secrets (`env/*.txt`), and model auto-discovery across providers.
+- **`src/agent.ts`**: The "Cerebral Cortex". Manages the Re-Act autonomous loop, memory compaction (Every 5 turns), and session summarization.
+- **`src/toolbox.ts`**: The "Motor Cortex". Handles code execution, file i/o, and automatic tool discovery in the `tools/` directory.
+- **`src/llm.ts`**: The "Communication Layer". Abstratcs OpenAI, OpenRouter, and Ollama APIs into a single `chat()` interface with built-in failover.
 
+## 🧱 The LEGO Protocol
+The architecture is inherently modular. Instead of a monolithic system prompt, SimpleClaw uses **Instruction Bricks** (LEGOs):
+- **Core Persona**: Foundational identity.
+- **Toolbox**: Dynamic list of tool capabilities.
+- **Project Map**: High-level file structure (loaded on-demand).
+- **Protocols**: Advanced dev-rules (loaded on-demand).
 
-## 2. Server & Lanes (`src/server.ts`)
+## 💾 Storage Conventions
+- **`config.json`**: Global operational settings (Models, Modes, Security).
+- **`env/`**: Plain-text API keys (e.g., `openai.txt`, `ollama.txt`).
+- **`storage/sessions/`**: Archived conversation summaries and token usage logs.
+- **`tools/`**: Persistent JS scripts.
+- **`tools/temp/`**: Session-specific ephemeral tools.
 
-The server uses a **Lane-based Command Queue** system:
-- **Main Lane**: Synchronous execution.
-- **Background Lane**: Asynchronous tasks (concurrency limit: 2).
-  - Triggered via `<EXEC lane="background">`.
-
-## 3. Tool Auto-Discovery (`tools/`)
-
-- **Mechanism**: The agent scans `tools/*.js` at startup.
-- **Registration**: Files are automatically added to the system prompt with their first-line description.
-- **Standard Tools**:
-  - `tools/browse.js`: Puppeteer-based headless browser. Usage: `node tools/browse.js <url> [screenshot_path]`.
-
-## 4. Workspace Conventions
-
-- **`saved_data/`**: Dedicated folder for all agent outputs (images, docs, reports).
-- **`env/`**: Secrets storage (API keys).
-- **`storage/`**: Session memory persistence.
-
-## 5. Environment Variables
-
-- `PORT`: Server port (default 3001).
-- `OPENROUTER_API_KEY`: For OpenRouter access.
-- `HF_TOKEN`: For HuggingFace access.
-
-## 6. Memory & Summarization
-
-- **Tiered Strategy**: summarization triggers every 5 turns.
-- **Intensities**: 
-  - `super-eco`: Pin-point (3 lines).
-  - `eco`: Concise bullets (Issues/Solutions).
-  - `standard`: Detailed bullets (Full logs).
-- **Mechanical Switch**: Dedicated model compute for background tasks (`summarizerEnabled`).
-- **Isolation**: Every reset archives to `storage/sessions` and wipes active memory.
-
+## 🚥 Request Handling
+The system processes chat requests **Sequentially**. Each POST to `/api/chat` triggers a full autonomous cycle. The response is only returned once the Agent decides the task is "Done" or hits its step limit.

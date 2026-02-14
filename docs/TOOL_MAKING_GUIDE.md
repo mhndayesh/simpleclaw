@@ -1,36 +1,50 @@
-# AI Tool-Making Guide
+# AI Tool-Making Guide: Self-Evolution Protocol 🧬
 
-This guide is for SimpleClaw assistants. Follow these rules when asked to create or modify tools in the `/tools` directory.
+This guide defines the standards for creating and modifying tools within the SimpleClaw ecosystem. Follow these strictly to ensure the Assistant can discover and use your contributions.
 
-## 1. ESM Protocol (CRITICAL)
-SimpleClaw is an **ES Module (ESM)** project (`"type": "module"`).
-- **DO NOT** use `require()` or `module.exports`.
-- **DO USE** `import` and `export`.
-- Files created with `.js` extension are treated as ESM.
-- If you must use CommonJS, use the `.cjs` extension.
+## 1. The Discovery Mechanism
+SimpleClaw uses **Auto-Discovery** for its toolbox. 
+- **Location**: All persistent tools MUST be placed in `tools/*.js`.
+- **Registration**: The `Toolbox` class (in `src/toolbox.ts`) scans the directory at startup.
+- **Description**: The first line of your script MUST be a comment (e.g., `// This tool does X`). This description is what the AI "sees" in its tool list.
 
-### Example (Correct ESM):
+## 2. ESM Protocol (Required)
+The project uses **ES Modules**.
+- **Extension**: `.js` (processed as ESM due to `"type": "module"` in `package.json`).
+- **Standard**: Use `import/export`. Never use `require/module.exports`.
+
+## 3. Tool Template
 ```javascript
-import fs from 'fs';
-import os from 'os';
+// [NAME]: [DESCRIPTION FOR THE AI]
+// Example: // file-meta: Analyzes file size and modification dates.
 
-console.log('System Uptime:', os.uptime());
+import fs from 'fs';
+import path from 'path';
+
+// 1. Process arguments from the shell
+const targetPath = process.argv[2] || '.';
+
+// 2. Wrap logic in a try-catch for stable system logs
+try {
+    const stats = fs.statSync(targetPath);
+    console.log(JSON.stringify({
+        path: targetPath,
+        size: stats.size,
+        modified: stats.mtime
+    }, null, 2));
+} catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+}
 ```
 
-## 2. Dependency Management
-- Check `package.json` for available dependencies (e.g., `axios`, `chalk`).
-- If you need a new dependency, ask the user or use `<EXEC>npm install <package></EXEC>`.
+## 4. Environment Context
+- **Working Directory**: The Agent always executes tools from the **Project Root**.
+- **Utilities**: You can import logic from `dist/utils.js` if needed (requires the project to be built).
+- **Security**: If the `Security Toggle` is ON, only commands starting with `node tools/` are allowed.
 
-## 3. Path Handling
-- Always use absolute paths or paths relative to the project root.
-- Use the `tools/` directory for your helper scripts.
-
-## 4. Error Handling
-- Wrap complex logic in `try/catch` blocks.
-- Provide clear error messages to the console for easier debugging by the system.
-
-## 5. Persistence
-- Use `storage/` for any data you need to persist between tool executions.
+## 5. Ephemeral Tools
+If the AI creates a tool specifically for a single session, it should place it in `tools/temp/`. These are automatically cleared by the `System` class periodically to keep the workspace clean.
 
 ---
-*Reference: docs/TOOL_MAKING_GUIDE.md*
+**Protocol Message**: "I am a self-evolving system. If I am missing a capability, I will create it." 🦞

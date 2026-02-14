@@ -1,28 +1,44 @@
-# Core Engine Architecture
+# SimpleClaw Core Engine: Deep-Dive 🧠
 
-SimpleClaw is built on a modular "assistant-first" architecture. The core logic resides in `src/core/`.
+SimpleClaw is built on a high-performance, modular TypeScript architecture optimized for agentic workflows. The core logic is split into three primary unified modules that handle state, intelligence, and system interaction.
 
-## 🧠 Memory Management ([memory.ts](file:///c:/simpleclaw/src/core/memory.ts))
-The `SessionMemory` class handles everything related to persistence.
-- **Persistence**: Data is stored in `storage/session_[id].json`.
-- **Metadata**: Each session has a `.meta.json` file storing usage tokens, request counts, and the current **Neural Mode**.
-- **Mode-Aware Compaction**: SimpleClaw doesn't just truncate history; it summarizes older turns based on the selected mode to maintain context while saving tokens.
+## 1. The Controller: `System` ([system.ts](file:///c:/simpleclaw/src/system.ts))
+The `System` class is a **Singleton** that acts as the source of truth for the entire application.
 
-## 🛠️ Tool Execution System ([tools.ts](file:///c:/simpleclaw/src/core/tools.ts))
-SimpleClaw gives the models raw power to interact with the host system via two specific tags:
+- **Configuration**: Manages `config.json`. Tracks the `activeMode`, `primary` model, and the **Mechanical Summarizer Switch** (`summarizerEnabled`).
+- **Secrets Management**: Safely loads and redacts API keys from the `env/` directory.
+- **Model Discovery**: Features provider-aware logic for Ollama (local), OpenRouter, OpenAI, and HuggingFace. It probes endpoints and returns available model IDs for the UI.
+- **Identity Synthesis**: Generates the initial system prompt by combining the base persona with a mode-specific **Lego Lane**.
 
-1.  **`<EXEC>command</EXEC>`**: Executes any shell command via `child_process.exec`.
-2.  **`<WRITE path="file.ts">content</WRITE>`**: Writes content to any path relative to the project root.
+## 2. The Brain: `Agent` ([agent.ts](file:///c:/simpleclaw/src/agent.ts))
+The `Agent` class implements the **Think-Act-Observe (Re-Act)** loop.
 
-The Assistant uses these tools to add new features or adjust its own source code on the fly.
+- **Heartbeat Loop**: 
+  - Each message turn can trigger up to 10 autonomous steps (5 in `eco`, 3 in `super-eco`).
+  - **Think**: Sends the current context (Memory + Summary + LEGOs) to the LLM.
+  - **Act**: Parses the response for `<EXEC>`, `<WRITE>`, `<READ>`, `<LIST>`, or `<GET_LEGO>` tags.
+  - **Observe**: Executes the found tool and appends the raw output back into memory as a `system` role message for the next step.
+- **Tiered Memory Compaction**:
+  - **Trigger**: Every 5 user turns.
+  - **Summarization**: Uses the primary (or dedicated) model to update a running `sessionSummary`.
+  - **Pruning**: Memory is pruned to keep only the System Header, the Summary, and the last few message exchanges.
+- **Isolation Protocol**: On session reset, usage stats are archived to `storage/sessions/` and memory is wiped to zero.
 
-## 👥 Identity & Prompts ([identity.ts](file:///c:/simpleclaw/src/core/identity.ts))
-System prompts are dynamic and generated based on the current mode.
-- **Neural Protocol Injection**: Each mode has a specific "Operational Directive" appended to the system prompt.
-- **User Overrides**: If a `fresh-start.md` file exists in the root, it is automatically appended to the default identity persona, allowing users to permanentely customize the assistant's behavior.
+## 3. The Hands: `Toolbox` ([toolbox.ts](file:///c:/simpleclaw/src/toolbox.ts))
+The `Toolbox` class is the interface between the AI and your operating system.
 
-## 🛣️ Path Calibration ([paths.ts](file:///c:/simpleclaw/src/core/paths.ts))
-To ensure portability, the `getProjectRoot()` utility:
-1.  Checks for a `SIMPLECLAW_ROOT` entry in `.env`.
-2.  If missing, it traverses up to find the nearest `package.json`.
-3.  Ensures all file operations are anchored to this absolute path, making the app drive-folder agnostic.
+- **Auto-Discovery**: At startup, it scans `tools/` and `tools/temp/` for `.js` files. It reads the first line (comment) to build a "Tool Capabilities" list for the Agent.
+- **Native Operations**:
+  - `executeCommand`: Runs shell commands with an optional security allowlist.
+  - `readTool / writeTool`: Direct file-system interaction restricted to the project root.
+  - `listTool`: Directory traversal for identifying project assets.
+
+## 🧱 Modular Instructions (LEGOs)
+SimpleClaw uses a **Pull-based context system**. Instead of sending 2,000 tokens of "rules" every time:
+1. The Agent starts with a **Lego Lane** (a list of available brick names).
+2. If it needs deeper context (e.g., the `project_map` or complex `protocols`), it emits `<GET_LEGO name="x" />`.
+3. The next step injects that specific instruction block into memory.
+4. This ensures maximum clarity for the model and minimum cost for the user.
+
+---
+**Tip for Developers**: To add a new capability, create a `.js` file in `tools/` with a one-line comment at the top. The Agent will automatically discover it and understand when to use it! 🚀

@@ -1,46 +1,63 @@
-# SimpleClaw API Reference
+# SimpleClaw API Reference (v1.2.0) 📡
 
-SimpleClaw exposes a RESTful API on port `3001` (by default) that powers both the CLI and the Web UI.
+The SimpleClaw API is a lightweight Express server (Port 3001) that facilitates communication between the UI/CLI and the Core Engine.
 
-## Authentication
-The API currently operates locally and does not require a separate auth token. API keys for providers are managed via the `/api/secrets` endpoint.
+## 🧩 Shared Interfaces
 
-## Endpoints
+```typescript
+interface AppConfig {
+    primary: ModelRef;          // Main model
+    summarizer?: ModelRef;      // Dedicated summarizer (optional)
+    summarizerEnabled: boolean; // Mechanical Switch state
+    fallback: ModelRef;         // FAILSAFE model
+    activeMode: string;         // super-eco, eco, standard, full-context
+    security: { enabled: boolean };
+}
 
-### Models
-- **GET `/api/models`**: List all models from all active providers.
-  - *Response*: Array of `ModelMetadata` (id, name, provider).
+interface Usage {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    avgTokens: number; // Tokens per autonomous step
+}
+```
 
-### Configuration
-- **GET `/api/config`**: Get the current global [config.json](file:///c:/simpleclaw/config.json).
-- **POST `/api/config`**: Update configuration settings.
-  - *Body*: `AppConfig` object.
+## 🛤️ Endpoints Guide
 
-### Secrets (API Keys)
-- **GET `/api/secrets`**: Get redacted API keys for display in UI.
-- **POST `/api/secrets`**: Update API keys.
-  - *Body*: `{ "openrouter": "...", "hf": "..." }`. Keys are stored in the `env/` directory.
+### 1. Chat Engine
+- **POST `/api/chat`**
+  - **Payload**: `{ "message": "string" }`
+  - **Behavior**: Triggers the `Agent.chat()` loop. 
+  - **Response**: 
+    ```json
+    {
+      "response": "Final distilled answer...",
+      "usage": { "inputTokens": 100, "outputTokens": 50, ... },
+      "mode": "standard",
+      "security": "ON"
+    } 
+    ```
+  - **Sanitization**: Before returning, the API strips all XML tags (`<EXEC>`, `<WRITE>`, etc.) and internal "thinking" blocks to provide a professional user experience.
 
-### Session Management
-- **GET `/api/session?session=id`**: Get history, current mode, and usage stats for a session.
-- **POST `/api/session/new`**: Archives the current session and resets it to a clean state.
-  - *Body*: `{ "session": "id" }`.
+### 2. Configuration & State
+- **GET `/api/config`**: Fetches the current `config.json`.
+- **POST `/api/config`**: overwrites the configuration. Used by the UI's "Save Neural Configuration" button.
+- **GET `/api/setup-status`**: Returns `{ "isSetup": boolean }`.
 
-### The Chat Engine
-- **POST `/api/chat`**: The primary endpoint for AI interaction.
-  - *Body*: `{ "query": "...", "model": "...", "session": "..." }`.
-  - *Features*:
-    - **Request Queuing**: Serializes requests per session to prevent race conditions.
-    - **Smart Sanitization**: Strips internal tags (`<EXEC>`, `<WRITE>`, `<thinking>`, etc.) from the response content before returning it.
-    - **Background Task Reporting**: Automatically reports results of finished background tasks at the start of next interaction.
-    - **Tool Loop**: Automatically processes `<EXEC>`, `<WRITE>`, and `<BACKGROUND_EXEC>` commands.
-    - **Auto-Sync**: Synchronizes system prompts if a mode change is detected in the query.
+### 3. API Key Management
+- **GET `/api/secrets`**: Returns redated secrets (e.g., `sk-••••1234`).
+- **POST `/api/secrets`**: Updates provider keys in the `env/` directory.
 
-## Neural Mode Behaviors
-The API adjusts its behavior based on the `mode` stored in session metadata:
+### 4. Session & History
+- **GET `/api/session`**: returns current usage and mode.
+- **POST `/api/session/new`**: Archives the current summary and usage to `storage/sessions/` and resets the Agent context to zero.
 
-| Mode | Max Turns | Memory Compaction |
-| :--- | :--- | :--- |
-| `super-eco` | 1 | Aggressive (Keep 3 user turns) |
-| `standard` | 5 | Balanced (Keep 10 user turns) |
-| `full-context` | 10 | None (Full history sent) |
+### 5. Model Discovery
+- **GET `/api/models/:provider`**
+  - **Providers**: `ollama`, `openrouter`, `openai`, `huggingface`.
+  - **Behavior**: Probes the provider API. If offline (e.g., local Ollama), it returns an empty list silently to prevent UI errors.
+
+---
+
+## 🔘 The Mechanical Switch
+The API respects the `summarizerEnabled` flag. If `true`, all summarization requests triggered during the chat loop are routed to the `summarizer` model configuration instead of the `primary` model. This allows for dedicated, low-cost compute for background tasks.

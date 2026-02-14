@@ -1,47 +1,38 @@
-# SimpleClaw Features Deep-Dive 🦞
+# SimpleClaw: Comprehensive Feature Set (v1.2.0) 🦞
 
-SimpleClaw isn't just a model picker; it's a complete local AI ecosystem. Below is a comprehensive list of every feature currently baked into the project.
+SimpleClaw is a modular AI chassis designed for professional-grade autonomy and local-first compute efficiency.
 
-## 🧠 Intelligence & Models
-- **Hybrid Provider Support**: native integration for Ollama, OpenRouter, and Hugging Face.
-- **Model Discovery**: Real-time scanning of local and remote model libraries.
-- **Neural Protocol Modes**:
-    - `super-eco`: Ultra-fast, low-context logic.
-    - `standard`: Balanced Turn-based assistance.
-    - `full-context`: Unrestricted engineering mode.
-- **Mechanical Summarizer Switch**: Dedicated model compute gate for background tasks.
-- **Model Fallbacks**: Automatic "Plan B" if your primary model fails or is offline.
+## 🏛️ Architecture & Governance
+- **Singleton System Controller**: Unified management of state, secrets, and configuration.
+- **LEGO Modular Prompts**: Instruction bricks (`core_persona`, `toolbox`, `project_map`, `protocols`) loaded on-demand to save tokens.
+- **Absolute Portability**: Calibration engine ensures the app runs from any path without configuration changes.
+- **God-Mode Toggle**: Optional security bypass for unrestricted AI self-mutation and tool creation.
 
+## 🧠 Intelligence Engine
+- **4-Tier Neural Modes**:
+  - `super-eco`: 1-turn, max speed, extreme context compression.
+  - `eco`: 3-turn, balanced, cost-aware logic.
+  - `standard`: 5-turn, default problem-solving.
+  - `full-context`: 10-turn, R&D focused, 100% history preservation.
+- **Tiered Memory Summarization**: Mode-aware context compaction triggered every 5 turns.
+- **Mechanical Summarizer Switch**: Explicit hardware/model allocation for background summarization tasks.
+- **Failover Logic**: Automatic provider switching if the primary model is unavailable.
 
-## 🛠️ Assistant Capabilities (The Tool Loop)
-- **Active Self-Mutation**: The assistant can rewrite its own code (source files in `src/` and `ui/`).
-- **Dynamic Tool Creation**: Can generate and execute new scripts in real-time.
-- **System Command Execution**: Directly interacts with the shell for file management, builds, and more.
-- **Markdown Response Processing**: Intelligently extracts `<EXEC>` and `<WRITE>` tags from AI responses.
+## 🛠️ Operational Autonomy
+- **Re-Act Execution Loop**: "Think-Act-Observe" cycle allowing the AI to use complex tool sequences.
+- **Auto-Discovery Toolbox**: Instant registration of any `.js` script in the `tools/` directory.
+- **Ephemeral Tooling**: Creation and automatic cleanup of session-specific helper scripts.
+- **Headless Browsing**: Built-in Puppeteer integration for web research and information extraction.
 
-## 📁 Data & Portability
-- **Root Calibration Engine**: Self-correcting absolute path detection via `setup.bat`.
-- **Zero-Absolute Persistence**: Session data and settings are strictly relative to the project home.
-- **Local-First Storage**: No cloud databases required; all memory is stored in transparent JSON files.
-- **Passive Isolation Protocol**: Every reset archives the session and wipes memory to 0, ensuring a fresh context.
-- **Session Archiving**: Automatic storage of summaries and usage stats in `storage/sessions/`.
+## 💻 Human Interfaces
+- **Vibe-Coded Web UI**: Glossmorphic dark theme with real-time token tracking and visual configuration.
+- **Production CLI**: Low-latency terminal interface for batch operations and rapid prototyping.
+- **Session Isolation**: Automatic archival of memory to `storage/sessions/` on every reset.
 
+## 🧹 Maintenance & Safety
+- **Public-Sync Sanitizer**: Deep cleanup script that strips API keys and personal data for safe GitHub sharing.
+- **Redacted Secrets**: In-UI management of credentials with 100% local storage encryption (plaintext files in `env/`).
+- **Path-Agnostic Setup**: Single-command installer (`setup.bat`) for dependency resolution and build.
 
-## 💻 Interfaces
-- **Universal CLI**: Fully functional command-line terminal with memory and tool support.
-- **Sleek Web UI**:
-    - Dark-mode optimized, modern aesthetic.
-    - Setup Wizard for one-click configuration.
-    - Redacted API Key management for security.
-    - Real-time token usage and cost metrics.
-- **Neural Mode Selector**: Global switch for changing the assistant's brain profile instantly.
-
-## 🧹 Security & Sanitization (Published State)
-- **Automatic Sanitizer**: One-click script to strip all API keys and personal data.
-- **Deep Cleanup**: Removes temporary numeric folders and backup artifacts.
-- **Leak Prevention**: Pre-configured `.gitignore` protecting and isolating private data.
-
-## 🚀 Speed & Efficiency
-- **Mode-Aware Compaction**: Intelligent summarization of history to keep context windows short and crisp.
-- **Background Server Architecture**: Backend runs minimized, allowing the UI and CLI to feel snappy.
-- **TypeScript Core**: Robust, type-safe logic compiled for maximum execution speed.
+---
+**SimpleClaw: More than an assistant. A self-evolving environment.** 🏆🏛️🧱✨🦞🚀
