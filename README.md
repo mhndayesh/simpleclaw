@@ -8,14 +8,25 @@
 
 <br />
 
+## 🧬 Self-Mutation & Evolution
+SimpleClaw is unique: it is designed to **evolve itself**. Unlike static assistants, SimpleClaw has direct write-access to its own soul (source code).
+
+- **What it is**: The Agent can rewrite its TypeScript backend, React frontend, and Tool registry in real-time.
+- **How it works**: Using the `<WRITE>` protocol, the AI emits raw code chunks which are instantly saved to the filesystem, and the dev server (Vite/TS) hot-reloads the changes.
+- **Why it matters**: Self-healing (fixing its own bugs), Feature Expansion (building its own tools), and UI Personalization.
+- **How to trigger**: Simply ask it. *"Rewrite the Chat component to be glassmorphic"* or *"Add a new API endpoint for X"*.
+
+> [!CAUTION]
+> **UNRESTRICTED POWER**: SimpleClaw is a self-evolving AI chassis. Safety rails are almost non-existent by design. It can and will rewrite its own source if commanded. Use with extreme caution.
+
+---
+
 SimpleClaw is a minimalist, local-first, **Vibe Coded** AI operational assistant. It serves as a unified gateway to local models (via **Ollama**) and remote providers (**OpenAI, OpenRouter, HuggingFace**), providing both a Command Line Interface (CLI) and a modern Web UI.
 
 Built with a focus on **portability** and **self-evolution**, SimpleClaw allows you to manage AI interactions with ease while keeping your data under your control.
 
-> [!CAUTION]
-> **UNRESTRICTED EVOLUTION**: SimpleClaw is designed to be fundamentally self-evolving. The assistant has the freedom to create new tools, modify existing code, and even rewrite its own source. Safety rails are almost non-existent by design. Use with extreme caution.
-
 ---
+
 
 ## 🧠 Neural Modes
 Choose the profile that fits your specific operational needs:
