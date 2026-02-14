@@ -34,17 +34,8 @@ Built with a focus on **portability** and **self-evolution**, SimpleClaw allows 
 ## 🧠 Neural Modes
 Choose the profile that fits your specific operational needs:
 
-| Mode | Alias | Focus | Lego Management |
-| :--- | :--- | :--- | :--- |
-| **Super-Eco** | `ghost` | Speed & Cost | Minimal (Request Bricks) |
-| **Eco** | `operative` | Efficiency | Persona Loaded |
-| **Standard** | `assistant` | Productivity | Persona & Toolbox Loaded |
-| **Full-Context** | `engineer` | R&D | All Bricks Pre-loaded |
-
----
-
-## 🧱 Brick Architecture (LEGO)
-SimpleClaw uses a modular instruction system to save tokens. Instead of sending thousands of lines of rules every time, the Agent only loads what it needs.
+| Mode | Alias | Focus | Prompt Injection | Token Est. | Cost |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 
 - **On-Demand Loading**: Use `<GET_LEGO name="bricks_name" />` to load specific instruction blocks.
 - **Available Bricks**: `core_persona`, `toolbox`, `project_map`, `protocols`.
