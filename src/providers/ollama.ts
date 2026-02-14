@@ -13,7 +13,6 @@ export class OllamaProvider implements Provider {
     }
 
     async discoverModels(): Promise<ModelMetadata[]> {
-        // Return cached result if discovery was recent
         const now = Date.now();
         if (this.cachedModels && this.cachedModels.length > 0 && (now - this.lastDiscovery) < this.discoveryInterval) {
             return this.cachedModels;
@@ -21,31 +20,35 @@ export class OllamaProvider implements Provider {
 
         const hosts = ['http://127.0.0.1:11434', 'http://localhost:11434', 'http://ollama:11434'];
 
-        for (const host of hosts) {
+        // Probe all potential hosts in parallel to avoid sequential timeout delays
+        const probes = hosts.map(async (host) => {
             try {
-                // Minimal log to avoid spamming during startup
-                console.log(`[Ollama] probing ${host}...`);
-                const response = await axios.get(`${host}/api/tags`, { timeout: 800 });
+                const response = await axios.get(`${host}/api/tags`, { timeout: 1000 });
                 const data = response.data;
-
                 if (data.models && Array.isArray(data.models) && data.models.length > 0) {
-                    console.log(`[Ollama] found ${data.models.length} models on ${host}`);
-                    this.baseUrl = host;
-                    this.cachedModels = data.models.map((m: any) => ({
-                        id: m.model || m.name,
-                        name: m.name,
-                        provider: 'ollama'
-                    }));
-                    this.lastDiscovery = Date.now();
-                    return this.cachedModels;
+                    return { host, models: data.models };
                 }
-            } catch (error) {
-                // Try next host; keep errors quiet to avoid noisy logs
-                continue;
+            } catch {
+                return null;
             }
+            return null;
+        });
+
+        const results = await Promise.all(probes);
+        const successfulProbe = results.find(r => r !== null);
+
+        if (successfulProbe) {
+            // console.log(`[Ollama] auto-detected ${successfulProbe.models.length} model(s) on ${successfulProbe.host}`);
+            this.baseUrl = successfulProbe.host;
+            this.cachedModels = successfulProbe.models.map((m: any) => ({
+                id: m.model || m.name,
+                name: m.name,
+                provider: 'ollama'
+            }));
+            this.lastDiscovery = Date.now();
+            return this.cachedModels;
         }
 
-        // No models found; update cache timestamp to avoid immediate retries
         this.cachedModels = [];
         this.lastDiscovery = Date.now();
         return [];

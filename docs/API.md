@@ -30,8 +30,10 @@ The API currently operates locally and does not require a separate auth token. A
 - **POST `/api/chat`**: The primary endpoint for AI interaction.
   - *Body*: `{ "query": "...", "model": "...", "session": "..." }`.
   - *Features*:
-    - **Neural Mode Logic**: Automatically adjusts turn counts and memory compaction based on session mode.
-    - **Tool Loop**: Automatically processes `<EXEC>` and `<WRITE>` commands returned by the model.
+    - **Request Queuing**: Serializes requests per session to prevent race conditions.
+    - **Smart Sanitization**: Strips internal tags (`<EXEC>`, `<WRITE>`, `<thinking>`, etc.) from the response content before returning it.
+    - **Background Task Reporting**: Automatically reports results of finished background tasks at the start of next interaction.
+    - **Tool Loop**: Automatically processes `<EXEC>`, `<WRITE>`, and `<BACKGROUND_EXEC>` commands.
     - **Auto-Sync**: Synchronizes system prompts if a mode change is detected in the query.
 
 ## Neural Mode Behaviors

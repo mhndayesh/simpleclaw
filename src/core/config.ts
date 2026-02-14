@@ -11,6 +11,9 @@ export interface AppConfig {
     primary?: ModelPreference;
     fallback?: ModelPreference;
     setupComplete?: boolean;
+    security?: {
+        enabled: boolean;
+    };
 }
 
 export class ConfigManager {

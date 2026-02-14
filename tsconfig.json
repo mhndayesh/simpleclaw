@@ -38,5 +38,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "openclaw_ref",
+    "backup_14-Sat-02"
+  ]
 }

@@ -4,10 +4,21 @@ import chalk from 'chalk';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import { security } from './security.js';
+
 const execPromise = promisify(exec);
 
 export async function executeTool(command: string): Promise<string> {
     console.log(chalk.magenta(`\n[Executing Tool]: ${command}`));
+
+    if (security) {
+        // Wait for security check
+        const allowed = await security.validateCommand(command);
+        if (!allowed) {
+            return 'Execution Denied by User Policy / Security Settings';
+        }
+    }
+
     try {
         const { stdout, stderr } = await execPromise(command);
         return (stdout || '') + (stderr || '') || 'Success (no output)';
@@ -18,6 +29,14 @@ export async function executeTool(command: string): Promise<string> {
 
 export async function writeTool(filePath: string, content: string): Promise<string> {
     console.log(chalk.cyan(`\n[Writing File]: ${filePath}`));
+
+    if (security) {
+        const allowed = await security.validateWrite(filePath);
+        if (!allowed) {
+            return 'Write Operation Denied: Outside project root';
+        }
+    }
+
     try {
         const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
         const dir = path.dirname(absolutePath);
@@ -29,12 +48,16 @@ export async function writeTool(filePath: string, content: string): Promise<stri
     }
 }
 
-export function extractCommands(text: string): string[] {
-    const regex = /<EXEC>(.*?)<\/EXEC>/gs;
-    const matches = [];
+export function extractCommands(text: string): { command: string, lane: 'main' | 'background' }[] {
+    // Regex matches <EXEC>...</EXEC> or <EXEC lane="background">...</EXEC>
+    const regex = /<EXEC(?:\s+lane=["'](.*?)["'])?>(.*?)<\/EXEC>/gs;
+    const matches: { command: string, lane: 'main' | 'background' }[] = [];
     let match;
     while ((match = regex.exec(text)) !== null) {
-        matches.push(match[1]!.trim());
+        const laneAttr = match[1] || 'main'; // Default to main
+        const command = match[2]!.trim();
+        const lane = laneAttr.toLowerCase() === 'background' ? 'background' : 'main';
+        matches.push({ command, lane });
     }
     return matches;
 }

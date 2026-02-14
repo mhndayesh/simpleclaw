@@ -1,128 +1,334 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SimpleClaw - Mode Selector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleClaw | Autonomous Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .mode-selector { margin: 20px 0; padding: 10px; background: #f5f5f5; }
-        select { padding: 5px; margin: 0 10px; }
-        .chat-area { border: 1px solid #ccc; padding: 20px; min-height: 300px; }
-        .message { margin: 10px 0; padding: 10px; border-radius: 5px; }
-        .user { background: #e3f2fd; text-align: right; }
-        .assistant { background: #f3e5f5; }
-        .eco-mode { color: #2e7d32; font-weight: bold; }
-        .standard-mode { color: #1565c0; font-weight: bold; }
-        .full-mode { color: #c62828; font-weight: bold; }
+        :root {
+            --bg: #0f1117;
+            --panel: #1a1d26;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --user-bubble: #2563eb;
+            --ai-bubble: #262b37;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            background: var(--panel);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .logo { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar (History/Settings) */
+        aside {
+            width: 300px;
+            background: var(--panel);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            display: none; /* Hidden for now to focus on chat */
+        }
+
+        /* Chat Container */
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        #messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        /* Bubbles */
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            background: var(--ai-bubble);
+            border-bottom-left-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ai-msg pre {
+            background: #000;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Input Area */
+        footer {
+            padding: 1.5rem 2rem;
+            background: var(--bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-group {
+            background: var(--panel);
+            padding: 8px;
+            border-radius: 16px;
+            display: flex;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        button#send-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button#send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        button#send-btn:active { transform: translateY(0); }
+
+        /* Loader */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 10px;
+        }
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--text-dim);
+            border-radius: 50%;
+            animation: blink 1.4s infinite both;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
     </style>
 </head>
 <body>
-    <h1>SimpleClaw Chat Interface</h1>
-    
-    <div class="mode-selector">
-        <label for="modeSelect">Select Mode:</label>
-        <select id="modeSelect" onchange="changeMode()">
-            <option value="super-eco">🟢 Super Eco Mode</option>
-            <option value="standard">🔵 Standard Mode</option>
-            <option value="full-context">🔴 Full Context Mode</option>
-        </select>
-        <span id="modeDescription"></span>
-    </div>
 
-    <div class="chat-area" id="chatArea">
-        <div class="message assistant">
-            <span class="eco-mode">🟢 Super Eco Mode Active</span><br>
-            Minimal tokens: Only last 5 requests summarized, no tools sent unless requested
+    <header>
+        <div class="logo">SimpleClaw v1.1</div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>System Online | God Mode</span>
         </div>
-    </div>
+    </header>
 
-    <div>
-        <input type="text" id="userInput" placeholder="Type your message..." style="width: 300px; padding: 5px;">
-        <button onclick="sendMessage()">Send</button>
-        <label>
-            <input type="checkbox" id="includeTools"> Include Tools in Request
-        </label>
-    </div>
+    <main>
+        <div id="chat-container">
+            <div id="messages">
+                <div class="message ai-msg">
+                    Greetings. I am SimpleClaw. I have full system access and am ready for your commands.
+                </div>
+            </div>
+
+            <footer>
+                <div class="input-group">
+                    <input type="text" id="user-input" placeholder="Type a command or ask a question..." autofocus>
+                    <button id="send-btn">
+                        <span>Send</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </main>
 
     <script>
-        const MODES = {
-            'super-eco': { 
-                name: '🟢 Super Eco Mode',
-                desc: 'Minimal tokens: Only last 5 requests summarized, no tools sent unless requested',
-                color: 'eco-mode'
-            },
-            'standard': { 
-                name: '🔵 Standard Mode',
-                desc: 'Balanced: Moderate context with tool definitions',
-                color: 'standard-mode'
-            },
-            'full-context': { 
-                name: '🔴 Full Context Mode',
-                desc: 'Maximum context: Full history with all tools',
-                color: 'full-mode'
+        const chatBox = document.getElementById('messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Add User Message
+            appendMessage('user', text);
+            userInput.value = '';
+
+            // Add Loading Indicator
+            const loaderId = addLoader();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                removeLoader(loaderId);
+
+                if (data.error) {
+                    appendMessage('ai', `<span style="color:var(--error)">Error: ${data.error}</span>`);
+                } else {
+                    appendMessage('ai', formatResponse(data.response));
+                }
+            } catch (err) {
+                removeLoader(loaderId);
+                appendMessage('ai', `<span style="color:var(--error)">Failed to connect to server. Ensure it is running.</span>`);
             }
-        };
-
-        let currentMode = 'super-eco';
-        let conversation = [];
-
-        function changeMode() {
-            const select = document.getElementById('modeSelect');
-            currentMode = select.value;
-            
-            const modeInfo = MODES[currentMode];
-            document.getElementById('modeDescription').innerHTML = 
-                `<span class="${modeInfo.color}">${modeInfo.name}: ${modeInfo.desc}</span>`;
-            
-            addMessage('assistant', `${modeInfo.name} activated: ${modeInfo.desc}`);
         }
 
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const includeTools = document.getElementById('includeTools').checked;
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Add user message
-            addMessage('user', message);
-            conversation.push({ type: 'user', content: message });
-            
-            // Simulate AI processing with current mode
-            const response = simulateAIResponse(message, includeTools);
-            addMessage('assistant', response);
-            conversation.push({ type: 'assistant', content: response });
-            
-            input.value = '';
+        function appendMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `message ${role}-msg`;
+            div.innerHTML = content;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function simulateAIResponse(message, includeTools) {
-            const mode = MODES[currentMode];
-            let response = `Mode: <span class="${mode.color}">${mode.name}</span><br>`;
-            response += `Request: "${message}"<br>`;
-            
-            if (includeTools || currentMode !== 'super-eco') {
-                response += `Tools: WRITE, EXEC available<br>`;
-            }
-            
-            response += `Context used: Last ${currentMode === 'super-eco' ? '3' : 
-                        currentMode === 'standard' ? '10' : '50'} requests<br>`;
-            response += `Token estimate: ${currentMode === 'super-eco' ? '25-50' : 
-                        currentMode === 'standard' ? '100-200' : '500-1000'} tokens`;
-            
-            return response;
+        function addLoader() {
+            const id = 'loader-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'message ai-msg typing';
+            div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
         }
 
-        function addMessage(sender, content) {
-            const chatArea = document.getElementById('chatArea');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = content;
-            chatArea.appendChild(messageDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
+        function removeLoader(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.remove();
         }
 
-        // Initialize
-        changeMode();
+        function formatResponse(text) {
+            // Very basic markdown-ish formatting for codes
+            return text
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+                .replace(/\n/g, '<br>');
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     </script>
 </body>
 </html>

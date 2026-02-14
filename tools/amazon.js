@@ -1,0 +1,1 @@
+import puppeteer from 'puppeteer'; const url = 'https://www.amazon.com'; async function fetchAmazonPage() {  const browser = await puppeteer.launch();  const page = await browser.newPage();  await page.goto(url);  const html = await page.content();  await browser.close();  return html; } export default fetchAmazonPage;

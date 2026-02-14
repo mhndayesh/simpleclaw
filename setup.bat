@@ -1,46 +1,29 @@
 @echo off
-setlocal enabledelayedexpansion
-pushd "%~dp0"
+echo [SETUP] Initializing SimpleClaw...
 
-echo [1/6] Installing Backend Dependencies...
+:: 1. Install Dependencies
+echo [SETUP] Installing dependencies...
 call npm install
-
-echo [2/6] Building Backend...
-call npm run build
-
-echo [3/6] Calibrating Project Paths...
-node tools/calibrate-paths.js
-
-echo [4/6] Installing UI Dependencies...
-cd ui
-call npm install
-cd ..
-
-echo [5/6] Resetting Setup Wizard Status...
-node dist/index.js setup
-
-echo [6/6] Launching SimpleClaw...
-echo.
-echo Starting SimpleClaw API Server (Background)...
-start /min "SimpleClaw-Backend" cmd /c "node dist/server.js"
-
-echo Waiting for API to initialize...
-:check_api
-powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://localhost:3001/api/setup-status' -Method Get -TimeoutSec 1; if ($response.StatusCode -eq 200) { exit 0 } } catch { exit 1 }" >nul 2>&1
-if !errorlevel! neq 0 (
-    <nul set /p="."
-    timeout /t 1 /nobreak >nul
-    goto check_api
+if %errorlevel% neq 0 (
+    echo [ERROR] npm install failed.
+    pause
+    exit /b %errorlevel%
 )
 
-echo.
-echo API is Online. Launching Setup Interface...
-start http://localhost:5173
+:: 2. Build Project
+echo [SETUP] Building project...
+call npm run build
+if %errorlevel% neq 0 (
+    echo [ERROR] Build failed.
+    pause
+    exit /b %errorlevel%
+)
 
-echo Starting Web Interface...
-cd ui
-npm run dev
+:: 3. Setup Temp Directory
+echo [SETUP] Creating tools directory...
+if not exist "tools" mkdir tools
+if not exist "tools\temp" mkdir tools\temp
+if not exist "saved_data" mkdir saved_data
 
-popd
-endlocal
-
+echo [SETUP] Complete! You can now run 'start.bat'.
+pause

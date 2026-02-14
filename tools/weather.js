@@ -1,0 +1,1 @@
+const axios = require('axios'); function getWeather(city) { axios.get(`https://wttr.in/${city}?format=j1`) .then(response => { console.log(response.data); }) .catch(error => { console.error(error); }); } getWeather("Jeddah");

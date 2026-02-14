@@ -14,35 +14,46 @@ const App = () => {
   const [status, setStatus] = useState('Checking connectivity...');
   const [mode, setMode] = useState(localStorage.getItem('simpleclaw-mode') || 'super-eco');
   const [manualMode, setManualMode] = useState({ primary: false, fallback: false });
-  const [secrets, setSecrets] = useState({ openrouter: '', hf: '' });
+  const [secrets, setSecrets] = useState({ openrouter: '', hf: '', openai: '' });
   const [saveStatus, setSaveStatus] = useState('');
   const [isSetup, setIsSetup] = useState(null); // null = checking, false = show wizard
   console.log('App initialization - isSetup:', isSetup);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const checkSetup = async () => {
+    const initialize = async () => {
       try {
-        const res = await axios.get('/api/setup-status');
-        setIsSetup(res.data.isSetup);
+        // 1. Check Setup
+        const setupRes = await axios.get('/api/setup-status');
+        setIsSetup(setupRes.data.isSetup);
+
+        // 2. Fetch Config first to know the provider
+        const configRes = await axios.get('/api/config');
+        setConfig(configRes.data);
+        const provider = configRes.data.primary?.provider || 'ollama';
+
+        // 3. Fetch models for that provider
+        fetchModelsForProvider(provider);
+
+        // 4. Fetch the rest
+        fetchSecrets();
+
+        const sessionRes = await axios.get('/api/session', { params: { session: 'default' } });
+        if (sessionRes.data?.history) setMessages(sessionRes.data.history);
+        if (sessionRes.data?.mode) {
+          setMode(sessionRes.data.mode);
+          localStorage.setItem('simpleclaw-mode', sessionRes.data.mode);
+          setStatus(`${sessionRes.data.mode} mode active`);
+        }
+        if (sessionRes.data?.usage) setUsage(sessionRes.data.usage);
+
       } catch (err) {
-        setIsSetup(true); // Default to true if server fails to avoid blocking
+        console.error('Initialization error:', err);
+        setStatus('Backend Link Failure');
+        setIsSetup(true); // Failsafe
       }
     };
-    checkSetup();
-    fetchModels();
-    fetchConfig();
-    fetchSecrets();
-    // restore session and mode from server
-    const fetchSession = async () => {
-      try {
-        const res = await axios.get('/api/session', { params: { session: 'default' } });
-        if (res.data?.history) setMessages(res.data.history);
-        if (res.data?.mode) { setMode(res.data.mode); localStorage.setItem('simpleclaw-mode', res.data.mode); setStatus(`${res.data.mode} mode active`); }
-        if (res.data?.usage) setUsage(res.data.usage);
-      } catch (e) { /* ignore */ }
-    };
-    fetchSession();
+    initialize();
   }, []);
 
   useEffect(() => {
@@ -64,11 +75,27 @@ const App = () => {
 
   const fetchModels = async () => {
     try {
-      const res = await axios.get('/api/models');
-      setModels(res.data);
+      const res = await axios.get('/api/models/ollama'); // Default to ollama on start
+      setModels(res.data.models);
       setStatus('System Ready');
     } catch (err) {
       setStatus('Backend Offline');
+    }
+  };
+
+  const fetchModelsForProvider = async (provider) => {
+    if (!provider) return;
+    setStatus(`Syncing ${provider}...`);
+    try {
+      const res = await axios.get(`/api/models/${provider}`);
+      const freshModels = res.data.models;
+      setModels(prev => [
+        ...prev.filter(m => m.provider !== provider.toLowerCase()),
+        ...freshModels
+      ]);
+      setStatus('System Ready');
+    } catch (err) {
+      setStatus(`Sync failed for ${provider}`);
     }
   };
 
@@ -93,7 +120,9 @@ const App = () => {
       setSaveStatus('Keys Saved! Refreshing...');
       setTimeout(() => {
         setSaveStatus('');
-        fetchModels();
+        if (config.primary?.provider) {
+          fetchModelsForProvider(config.primary.provider);
+        }
         fetchSecrets();
       }, 2000);
     } catch (err) {
@@ -112,8 +141,10 @@ const App = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/chat', { query: queryTerm, session: 'default' });
-      setMessages(prev => [...prev, ...res.data.newEvents]);
+      const res = await axios.post('/api/chat', { message: queryTerm, session: 'default' });
+      if (res.data.response) {
+        setMessages(prev => [...prev, { role: 'assistant', content: res.data.response }]);
+      }
       if (res.data.usage) setUsage(res.data.usage);
       if (res.data.mode) {
         setMode(res.data.mode);
@@ -129,6 +160,9 @@ const App = () => {
   const updateConfig = (key, provider, modelId) => {
     const newConfig = { ...config, [key]: { model: modelId, provider } };
     setConfig(newConfig);
+    if (provider && !modelId) {
+      fetchModelsForProvider(provider);
+    }
   };
 
   const saveConfig = async () => {
@@ -142,7 +176,7 @@ const App = () => {
     }
   };
 
-  const providersList = ['ollama', 'openrouter', 'huggingface'];
+  const providersList = ['ollama', 'openrouter', 'huggingface', 'openai'];
 
   const ModelSelector = ({ type }) => {
     const current = config[type] || {};
@@ -159,7 +193,7 @@ const App = () => {
             <button
               className="btn glass"
               style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }}
-              onClick={fetchModels}
+              onClick={() => fetchModelsForProvider(current.provider)}
               title="Refresh models list"
             >
               <RefreshCw size={14} /> Refresh
@@ -316,15 +350,18 @@ const App = () => {
               {messages.map((msg, i) => (
                 <div key={i} style={{
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '80%', padding: '1rem', borderRadius: 'var(--radius)',
-                  background: msg.role === 'user' ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.05)',
+                  maxWidth: msg.role === 'system' ? '95%' : '80%', padding: '1rem', borderRadius: 'var(--radius)',
+                  background: msg.role === 'user' ? 'hsl(var(--primary))' : msg.role === 'system' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.05)',
                   color: 'white', fontSize: '0.95rem', lineHeight: '1.5',
                   borderBottomRightRadius: msg.role === 'user' ? '0' : 'var(--radius)',
                   borderBottomLeftRadius: msg.role === 'assistant' ? '0' : 'var(--radius)',
-                  opacity: msg.role === 'system' ? 0.6 : 1,
-                  fontStyle: msg.role === 'system' ? 'italic' : 'normal',
+                  borderLeft: msg.role === 'system' ? '3px solid #6b7280' : 'none',
+                  fontFamily: msg.role === 'system' ? 'monospace' : 'inherit',
+                  opacity: msg.role === 'system' ? 0.8 : 1,
+                  boxShadow: msg.role === 'system' ? 'inset 0 0 10px rgba(0,0,0,0.2)' : 'none'
                 }}>
-                  <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{msg.content}</pre>
+                  {msg.role === 'system' && <div style={{ fontSize: '0.7rem', opacity: 0.5, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Log</div>}
+                  <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>{msg.content}</pre>
                 </div>
               ))}
               {loading && <div className="fade-in" style={{ padding: '0.5rem', opacity: 0.5 }}>SimpleClaw is thinking...</div>}
@@ -376,6 +413,17 @@ const App = () => {
                     placeholder="sk-or-v1-..."
                     value={secrets.openrouter}
                     onChange={(e) => setSecrets(prev => ({ ...prev, openrouter: e.target.value }))}
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: 'var(--radius)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', opacity: 0.8, marginBottom: '0.4rem', display: 'block' }}>OpenAI Key</label>
+                  <input
+                    type="password"
+                    className="glass"
+                    placeholder="sk-..."
+                    value={secrets.openai}
+                    onChange={(e) => setSecrets(prev => ({ ...prev, openai: e.target.value }))}
                     style={{ width: '100%', padding: '0.8rem', borderRadius: 'var(--radius)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent' }}
                   />
                 </div>

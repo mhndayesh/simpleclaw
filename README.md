@@ -38,9 +38,10 @@ Built with a focus on **portability** and **self-evolution**, SimpleClaw allows 
 
 ## 🚀 Key Features
 
-- **Self-Evolution**: Ask the assistant to add new capabilities, create tools, or modify the core engine using integrated `<WRITE>` and `<EXEC>` tags.
-- **Multi-Provider Support**: Seamlessly switch between Ollama, OpenRouter, and Hugging Face.
-- **Dual Interface**: Full-featured CLI for terminal lovers and a sleek React-based Web UI.
+- **🧩 Smart Sanitization**: Automatically strips internal "thinking" and technical XML tags from user-facing chat for a cleaner experience.
+- **🚥 Request Queuing**: Serializes chat requests per session to prevent race conditions and memory corruption.
+- **🛰️ Background Tasks**: Support for non-blocking command execution with asynchronous result reporting in subsequent turns.
+- **🔍 Advanced Search**: Integrated codebase search with support for file extensions, exclusion patterns, and content grepping.
 - **Smart Memory Profiles**: Choose between `super-eco` (low tokens), `standard`, and `full-context` modes.
 - **Portability First**: Absolute path-agnostic architecture—run SimpleClaw from any folder on any machine.
 - **One-Click Setup**: Automated installer handles paths, dependencies, and builds for you.

@@ -1,0 +1,1 @@
+import puppeteer from 'puppeteer'; const url = process.argv[2]; (async () => {   const browser = await puppeteer.launch();   const page = await browser.newPage();   await page.goto(url);   await page.screenshot({path: 'screenshot.png'});   await browser.close(); })().catch(error => console.error(error));

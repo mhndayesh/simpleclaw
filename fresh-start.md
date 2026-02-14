@@ -3,13 +3,14 @@
 This file is included in the system prompt for every new session. Keep it updated when you add new modes or tools.
 
 ## Modes (short descriptions)
-- `super-eco`: Minimal token usage. Send only a tiny summary of recent requests (e.g. last 3), no tools, no file contents.
-- `standard`: Balanced context. Include recent messages and key system notices; send tool requests when explicitly invoked.
-- `full-context`: Full conversation history and system prompts; use when detailed context is required.
+- `super-eco`: Direct-answer mode. Concise summaries (last 3 user turns verbatim), tool access ENABLED for operational utility.
+- `standard`: Balanced operational mode. 10 raw user turns, full tool access including background execution.
+- `full-context`: Expert mode. Full history preserved, proactive tool use and high-reasoning.
 
 ## Tools map (current)
-- `tools/*.js` — executable helper scripts created by the assistant via `<WRITE path="...">`.
-- `core/tools.ts` — host implementation for tool execution (`<EXEC>`) and file writes (`<WRITE>`).
+- `tools/*.js` — executable helper scripts. **MUST USE ESM (import/export)**.
+- `docs/TOOL_MAKING_GUIDE.md` — MUST READ this before creating new tools.
+- `core/tools.ts` — host implementation for `<EXEC>`, `<WRITE>`, and `<BACKGROUND_EXEC>`.
 - `storage/session_<id>.json` — per-session conversation history.
 
 ## Updating this file

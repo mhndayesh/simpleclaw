@@ -1,0 +1,1 @@
+import * as chromium from '@playwright/chromium'; const url = process.argv[2]; (async () => {   const browser = await chromium.launch();   const page = await browser.newPage();   await page.goto(url);   await page.screenshot({path: 'screenshot.png'});   await browser.close(); })().catch(error => console.error(error));
